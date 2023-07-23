@@ -1,0 +1,169 @@
+name: Publish coverage metrics
+
+on:
+  workflow_run:
+    workflows:
+      - CD/CI
+    types:
+      - completed
+    branches-ignore:
+      - 'dependabot/**'
+
+#env:
+#  COVERAGE_ARTIFATC_NAME: 'Coverage-reports-on-SHA'
+#  COVERAGE_CLOVER_UNIT_FILENAME: 'coverage-unit-test-clover.xml'
+#
+#  COVERAGE_INTEGRATION_ARTIFATC_NAME: 'Coverage-reports-integration-on-SHA'
+#  COVERAGE_CLOVER_INTEGRATION_FILENAME: 'coverage-integration-test-clover.xml'
+#
+#  COVERAGE_FUNCTIONAL_ARTIFATC_NAME: 'Coverage-reports-functional-on-SHA'
+#  COVERAGE_CLOVER_FUNCTIONAL_FILENAME: 'coverage-functional-test-clover.xml'
+
+
+jobs:
+  on-cdci-workflow-success:
+    runs-on: ubuntu-latest
+    name: Event - CdCi workflow Success
+    if: ${{ github.event.workflow.name == 'CD/CI' && github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout on branch ${{ github.event.workflow_run.head_branch }}|SHA-${{ github.event.workflow_run.head_commit.id }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.workflow_run.head_commit.id }}
+
+      - name: Dump GHA Context
+        uses: crazy-max/ghaction-dump-context@v1
+
+  triggering-workflow-info:
+    runs-on: ubuntu-latest
+    name: Triggering workflow info
+    steps:
+      - name: Checkout on branch ${{ github.event.workflow_run.head_branch }}|SHA-${{ github.event.workflow_run.head_commit.id }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.workflow_run.head_commit.id }}
+
+      - name: info triggering workflow - branch name ${{ github.event.workflow_run.head_branch }}
+        run: echo ${{ github.event.workflow_run.head_branch }}
+
+      - name: info triggering workflow - SHA ${{ github.event.workflow_run.head_commit.id }}
+        run: echo SHA from triggering workflow ${{ github.event.workflow_run.head_commit.id }}
+
+      - name: info triggering workflow - commit message
+        run: echo commit message from triggering workflow '${{ github.event.workflow_run.head_commit.message }}'
+
+      - name: info triggering workflow - author '${{ github.event.workflow_run.head_commit.author.name }}' -'${{ github.event.workflow_run.head_commit.author.email }}'
+        run: echo author '${{ github.event.workflow_run.head_commit.author.name }}' -'${{ github.event.workflow_run.head_commit.author.email }}'
+
+      - name: info triggering workflow - committer '${{ github.event.workflow_run.head_commit.committer.name }}' -'${{ github.event.workflow_run.head_commit.committer.email }}'
+        run: echo author '${{ github.event.workflow_run.head_commit.author.name }}' -'${{ github.event.workflow_run.head_commit.author.email }}'
+
+
+  publish-unit-test-report:
+    name: Publish unit test report
+    runs-on: ubuntu-latest
+    needs: [on-cdci-workflow-success]
+    steps:
+      - name: Checkout on branch ${{ github.event.workflow_run.head_branch }}|SHA-${{ github.event.workflow_run.head_commit.id }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.workflow_run.head_commit.id }}
+
+#      - name: Download unit test coverage artifact
+#        id: download-unit-test-coverage-artifact
+#        run: |
+#          ls -al
+#          gh run download -n ${{ env.COVERAGE_ARTIFATC_NAME }}-${{ github.event.workflow_run.head_commit.id }}
+#          ls -al
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GH_API_ARTIFACT_ACTION }}
+
+      - name: Download unit test coverage artifact
+        id: download-unit-test-coverage-artifact
+        uses: actions/download-artifact@v3
+        with:
+          #name: ${{ vars.ARTIFATC_NAME_FOR_UNIT_TEST_COVERAGE }}-${{ inputs.triggering-sha}}
+          name: ${{ vars.ARTIFATC_NAME_FOR_UNIT_TEST_COVERAGE }}-${{ github.event.workflow_run.head_commit.id }}
+
+
+#      - name: Upload coverage results to Codecov
+#        if: ${{ (steps.download-unit-test-coverage-artifact.outcome == 'success')}}
+#        uses: codecov/codecov-action@v1
+#        with:
+#          files: ${{ env.COVERAGE_CLOVER_UNIT_FILENAME }}
+#          name: Unit test
+#          flags: unit-test
+#          fail_ci_if_error: false
+#        continue-on-error: true
+
+      - name: Upload unit test coverage results to Codecov
+        if: ${{ (steps.download-unit-test-coverage-artifact.outcome == 'success')}}
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          #files: ${{ vars.REPORT_NAME_FOR_UNIT_TEST_COVERAGE_CLOVER }},${{ env.REPORT_NAME_FOR_UNIT_TEST_COVERAGE_JUNIT }}
+          files: ${{ vars.REPORT_NAME_FOR_UNIT_TEST_COVERAGE_CLOVER }}
+          name: Unit test
+          flags: unit-test
+          fail_ci_if_error: false
+
+
+
+#  publish-integration-test-report:
+#    name: Publish integration test report
+#    runs-on: ubuntu-latest
+#    needs: [on-cdci-workflow-success]
+#    steps:
+#      - name: Checkout on branch ${{ github.event.workflow_run.head_branch }}|SHA-${{ github.event.workflow_run.head_commit.id }}
+#        uses: actions/checkout@v2
+#        with:
+#          ref: ${{ github.event.workflow_run.head_commit.id }}
+#
+#      - name: Download integration test coverage artifact
+#        id: download-integration-test-coverage-artifact
+#        run: |
+#          ls -al
+#          gh run download -n ${{ env.COVERAGE_INTEGRATION_ARTIFATC_NAME }}-${{ github.event.workflow_run.head_commit.id }}
+#          ls -al
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GH_API_ARTIFACT_ACTION }}
+#
+#      - name: Upload coverage results to Codecov
+#        if: ${{ (steps.download-integration-test-coverage-artifact.outcome == 'success')}}
+#        uses: codecov/codecov-action@v1
+#        with:
+#          files: ${{ env.COVERAGE_CLOVER_INTEGRATION_FILENAME }}
+#          name: Integration test
+#          flags: integration-test
+#          fail_ci_if_error: false
+#        continue-on-error: true
+#
+#
+#  publish-functional-test-report:
+#    name: Publish functional test report
+#    runs-on: ubuntu-latest
+#    needs: [on-cdci-workflow-success]
+#    steps:
+#      - name: Checkout on branch ${{ github.event.workflow_run.head_branch }}|SHA-${{ github.event.workflow_run.head_commit.id }}
+#        uses: actions/checkout@v2
+#        with:
+#          ref: ${{ github.event.workflow_run.head_commit.id }}
+#
+#      - name: Download functional test coverage artifact
+#        id: download-functional-test-coverage-artifact
+#        run: |
+#          ls -al
+#          gh run download -n ${{ env.COVERAGE_FUNCTIONAL_ARTIFATC_NAME }}-${{ github.event.workflow_run.head_commit.id }}
+#          ls -al
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GH_API_ARTIFACT_ACTION }}
+#
+#      - name: Upload coverage results to Codecov
+#        if: ${{ (steps.download-functional-test-coverage-artifact.outcome == 'success')}}
+#        uses: codecov/codecov-action@v1
+#        with:
+#          files: ${{ env.COVERAGE_CLOVER_FUNCTIONAL_FILENAME }}
+#          name: Functional test
+#          flags: functional-test
+#          fail_ci_if_error: false
+#        continue-on-error: true

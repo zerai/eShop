@@ -1,0 +1,502 @@
+name: Acceptance stage
+
+on:
+  workflow_call:
+    # Map the workflow outputs to job outputs
+    inputs:
+      triggering-sha:
+        required: true
+        type: string
+
+env:
+  PHP_EXTENSIONS: ctype, iconv, json, curl, gd, intl, opcache, openssl, mbstring, mysql, pdo_sqlite
+  PHP_EXTENSIONS_CACHE_KEY: cache-php-extensions-v1
+  COVERAGE_INTEGRATION_ARTIFATC_NAME: 'Coverage-reports-integration-on-SHA'
+  COVERAGE_FUNCTIONAL_ARTIFATC_NAME: 'Coverage-reports-functional-on-SHA'
+  COVERAGE_CLOVER_INTEGRATION_FILENAME: 'coverage-integration-test-clover.xml'
+  COVERAGE_CLOVER_FUNCTIONAL_FILENAME: 'coverage-functional-test-clover.xml'
+  INTEGRATION_TEST_DOC_ARTIFATC_NAME: 'Docs-integration-test-on-SHA'
+  INTEGRATION_TEST_DOC_FILENAME: 'doc-integration-test.txt'
+  FUNCTIONAL_TEST_DOC_ARTIFATC_NAME: 'Docs-functional-test-on-SHA'
+  FUNCTIONAL_TEST_DOC_FILENAME: 'doc-functional-test.txt'
+
+
+jobs:
+#  triggering-workflow-info:
+#    runs-on: ubuntu-20.04
+#    name: Triggering workflow info
+#    steps:
+#      - name: Checkout on branch ${{ github.event.workflow_run.head_branch }}|SHA-${{ github.event.workflow_run.head_commit.id }}
+#        uses: actions/checkout@v3
+#        with:
+#          ref: ${{ github.event.workflow_run.head_commit.id }}
+#
+#      - name: info triggering workflow - branch name ${{ github.event.workflow_run.head_branch }}
+#        run: echo ${{ github.event.workflow_run.head_branch }}
+#
+#      - name: info triggering workflow - SHA ${{ github.event.workflow_run.head_commit.id }}
+#        run: echo SHA from triggering workflow ${{ github.event.workflow_run.head_commit.id }}
+#
+#      - name: info triggering workflow - commit message
+#        run: echo commit message from triggering workflow '${{ github.event.workflow_run.head_commit.message }}'
+#
+#      - name: info triggering workflow - author '${{ github.event.workflow_run.head_commit.author.name }}' -'${{ github.event.workflow_run.head_commit.author.email }}'
+#        run: echo author '${{ github.event.workflow_run.head_commit.author.name }}' -'${{ github.event.workflow_run.head_commit.author.email }}'
+#
+#      - name: info triggering workflow - committer '${{ github.event.workflow_run.head_commit.committer.name }}' -'${{ github.event.workflow_run.head_commit.committer.email }}'
+#        run: echo author '${{ github.event.workflow_run.head_commit.author.name }}' -'${{ github.event.workflow_run.head_commit.author.email }}'
+
+
+  app-preconditions-checks:
+    name: App preconditions checks
+    runs-on: ubuntu-20.04
+    #needs: [on-commit-stage-success]
+    timeout-minutes: 15
+    services:
+      pgsql:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_DB: ci-db_test
+          POSTGRES_PASSWORD: ci-db-password
+          POSTGRES_USER: ci-db-user
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    strategy:
+      matrix:
+        php:
+          - '8.0'
+      fail-fast: true
+    steps:
+      - name: Checkout on SHA-${{ inputs.triggering-sha }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.triggering-sha }}
+
+      - name: info triggering workflow - commit message
+        run: echo commit message from triggering workflow '${{ github.event.workflow_run.head_commit.message }}'
+
+      - name: Setup cache environment
+        id: cache-php-extensions
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          key: ${{ env.PHP_EXTENSIONS_CACHE_KEY }}
+
+      - name: Cache extensions
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.cache-php-extensions.outputs.dir }}
+          key: ${{ steps.cache-php-extensions.outputs.key }}
+          restore-keys: ${{ steps.cache-php-extensions.outputs.key }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.25.4
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          ini-values: memory_limit=-1
+          coverage: none
+          tools: composer
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --ansi --no-scripts
+
+      - name: Validate configurations files
+        run: |
+          ./bin/console lint:yaml config/ --ansi
+
+      - name: Validate Symfony containers (prod|dev)
+        run: |
+          ./bin/console lint:container -e prod --ansi
+          ./bin/console lint:container -e dev --ansi
+        continue-on-error: true
+
+      - name: Validate twig templates
+        run: |
+          ./bin/console lint:twig templates/ --ansi
+
+      - name: Run database migrations
+        if: ${{ github.ref_name == 'main' }}
+        run: ./bin/console doctrine:migrations:migrate -e test -n -vv --allow-no-migration --ansi
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+
+      - name: Run database schema update
+        if: ${{ github.ref_name != 'main' }}
+        run: ./bin/console doctrine:schema:update -e test --complete --force --ansi
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+
+      - name: Run database schema validate
+        run: ./bin/console doctrine:schema:validate -e test --ansi
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+
+
+  integration-test:
+    name: Integration tests
+    runs-on: ubuntu-20.04
+    needs:
+      - app-preconditions-checks
+    timeout-minutes: 15
+    services:
+      pgsql:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_DB: ci-db_test
+          POSTGRES_PASSWORD: ci-db-password
+          POSTGRES_USER: ci-db-user
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    strategy:
+      matrix:
+        php:
+          - '8.0'
+      fail-fast: true
+    steps:
+      - name: Checkout on SHA-${{ inputs.triggering-sha }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.triggering-sha }}
+
+      - name: info triggering workflow - commit message
+        run: echo commit message from triggering workflow '${{ github.event.workflow_run.head_commit.message }}'
+
+      - name: Setup cache environment
+        id: cache-php-extensions
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          key: ${{ env.PHP_EXTENSIONS_CACHE_KEY }}
+
+      - name: Cache extensions
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.cache-php-extensions.outputs.dir }}
+          key: ${{ steps.cache-php-extensions.outputs.key }}
+          restore-keys: ${{ steps.cache-php-extensions.outputs.key }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.25.4
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          ini-values: memory_limit=-1
+          coverage: pcov
+          tools: symfony
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --ansi --no-scripts
+
+      - name: Run database migrations
+        if: ${{ github.ref_name == 'main' }}
+        run: ./bin/console doctrine:migrations:migrate -e test -n -vv --allow-no-migration --ansi
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+
+      - name: Run database schema update
+        if: ${{ github.ref_name != 'main' }}
+        run: ./bin/console doctrine:schema:update -e test --complete --force --ansi
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+
+      - name: Run only integration test
+        run: |
+          bin/phpunit --testsuite=integration --colors=always \
+          --coverage-clover $COVERAGE_CLOVER_INTEGRATION_FILENAME \
+          --testdox-text $INTEGRATION_TEST_DOC_FILENAME
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+          DATABASE_DSN: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+          SYMFONY_DEPRECATIONS_HELPER: disabled
+
+      - name: Get integration test coverage artifact name
+        id: integration-coverage-artifact-name
+        run: echo "name=$COVERAGE_INTEGRATION_ARTIFATC_NAME-$GITHUB_SHA" >> $GITHUB_OUTPUT
+
+      - name: Save integration coverage reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.integration-coverage-artifact-name.outputs.name }}
+          path: ${{ env.COVERAGE_CLOVER_INTEGRATION_FILENAME }}
+
+      - name: Get integration test doc artifact name
+        id: integration-test-doc-artifact-name
+        run: echo "name=$INTEGRATION_TEST_DOC_ARTIFATC_NAME-$GITHUB_SHA" >> $GITHUB_OUTPUT
+
+      - name: Save test doc reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.integration-test-doc-artifact-name.outputs.name }}
+          path: ${{ env.INTEGRATION_TEST_DOC_FILENAME }}
+
+
+  functional-test:
+    name: Functional tests
+    runs-on: ubuntu-20.04
+    needs:
+      - app-preconditions-checks
+    timeout-minutes: 15
+    services:
+      pgsql:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_DB: ci-db_test
+          POSTGRES_PASSWORD: ci-db-password
+          POSTGRES_USER: ci-db-user
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    strategy:
+      matrix:
+        php:
+          - '8.0'
+        node:
+          - '16.x'
+      fail-fast: true
+    steps:
+      - name: Checkout on SHA-${{ inputs.triggering-sha }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.triggering-sha }}
+
+      - name: info triggering workflow - commit message
+        run: echo commit message from triggering workflow '${{ github.event.workflow_run.head_commit.message }}'
+
+      - name: Setup cache environment
+        id: cache-php-extensions
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          key: ${{ env.PHP_EXTENSIONS_CACHE_KEY }}
+
+      - name: Cache extensions
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.cache-php-extensions.outputs.dir }}
+          key: ${{ steps.cache-php-extensions.outputs.key }}
+          restore-keys: ${{ steps.cache-php-extensions.outputs.key }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.25.4
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          ini-values: memory_limit=-1
+          coverage: pcov
+          tools: symfony
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --ansi --no-scripts
+
+      - name: Run database migrations
+        if: ${{ github.ref_name == 'main' }}
+        run: ./bin/console doctrine:migrations:migrate -e test -n -vv --allow-no-migration --ansi
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+
+      - name: Run database schema update
+        if: ${{ github.ref_name != 'main' }}
+        run: ./bin/console doctrine:schema:update -e test --complete --force --ansi
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "${{ matrix.node }}"
+
+      - name: Build assets
+        run: |
+          bin/console assets:install public -vvv -e test
+
+      - name: Run webserver
+        run: symfony server:start --port=8080 --dir=public --daemon --no-tls
+
+      - name: Run functional testsuite
+        run: |
+          bin/phpunit --testsuite=functional --colors=always \
+          --coverage-clover $COVERAGE_CLOVER_FUNCTIONAL_FILENAME \
+          --testdox-text $FUNCTIONAL_TEST_DOC_FILENAME
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+          DATABASE_DSN: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db_test?serverVersion=13&charset=utf8
+          SYMFONY_DEPRECATIONS_HELPER: disabled
+
+      - name: Get functional test coverage artifact name
+        id: functional-coverage-artifact-name
+        run: echo "name=$COVERAGE_FUNCTIONAL_ARTIFATC_NAME-$GITHUB_SHA" >> $GITHUB_OUTPUT
+
+
+      - name: Save functional coverage reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.functional-coverage-artifact-name.outputs.name }}
+          path: ${{ env.COVERAGE_CLOVER_FUNCTIONAL_FILENAME }}
+
+      - name: Get functional test doc artifact name
+        id: functional-test-doc-artifact-name
+        run: echo "name=$FUNCTIONAL_TEST_DOC_ARTIFATC_NAME-$GITHUB_SHA" >> $GITHUB_OUTPUT
+
+
+      - name: Save test doc reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.functional-test-doc-artifact-name.outputs.name }}
+          path: ${{ env.FUNCTIONAL_TEST_DOC_FILENAME }}
+
+
+  behat-test:
+    name: Acceptance tests (behat)
+    runs-on: ubuntu-20.04
+    needs:
+      - app-preconditions-checks
+    timeout-minutes: 15
+    services:
+      pgsql:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_DB: ci-db_test
+          POSTGRES_PASSWORD: ci-db-password
+          POSTGRES_USER: ci-db-user
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    strategy:
+      matrix:
+        php:
+          - '8.0'
+        node:
+          - '16.x'
+      fail-fast: true
+    steps:
+      - name: Checkout on SHA-${{ inputs.triggering-sha }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.triggering-sha }}
+
+      - name: info triggering workflow - commit message
+        run: echo commit message from triggering workflow '${{ github.event.workflow_run.head_commit.message }}'
+
+      - name: Setup cache environment
+        id: cache-php-extensions
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          key: ${{ env.PHP_EXTENSIONS_CACHE_KEY }}
+
+      - name: Cache extensions
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.cache-php-extensions.outputs.dir }}
+          key: ${{ steps.cache-php-extensions.outputs.key }}
+          restore-keys: ${{ steps.cache-php-extensions.outputs.key }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.25.4
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          ini-values: memory_limit=-1
+          coverage: none
+          tools: symfony
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --ansi --no-scripts
+
+      - name: Run database migrations
+        if: ${{ github.ref_name == 'main' }}
+        run: ./bin/console doctrine:migrations:migrate -e test -n -vv --allow-no-migration --ansi
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+
+      - name: Run database schema update
+        if: ${{ github.ref_name != 'main' }}
+        run: ./bin/console doctrine:schema:update -e test --complete --force --ansi
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "${{ matrix.node }}"
+
+      - name: Build assets
+        run: |
+          bin/console assets:install public -vvv -e test
+
+      - name: Run webserver
+        run: symfony server:start --port=8080 --dir=public --daemon --no-tls
+
+      - name: Run behat tests
+        run: vendor/bin/behat --colors
+        env:
+          DATABASE_URL: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db?serverVersion=13&charset=utf8
+          DATABASE_DSN: postgresql://ci-db-user:ci-db-password@127.0.0.1:${{ job.services.pgsql.ports['5432'] }}/ci-db_test?serverVersion=13&charset=utf8
+          SYMFONY_DEPRECATIONS_HELPER: disabled

@@ -1,0 +1,29 @@
+name: CD/CI
+
+on:
+  push:
+
+jobs:
+  commit-stage-workflow:
+    name: Commit Stage
+    uses: zerai/eShop/.github/workflows/commit-stage.yaml@main
+    secrets: inherit
+    with:
+      triggering-sha: "${{ github.sha }}"
+
+  acceptance-stage-workflow:
+    name: Acceptance Stage
+    needs:
+      - commit-stage-workflow
+    uses: zerai/eShop/.github/workflows/acceptance-stage.yaml@main
+    with:
+      triggering-sha: "${{ github.sha }}"
+
+#  publish-metrics-workflow:
+#    name: Publish Metrics
+#    needs:
+#      - commit-stage-workflow
+#      - acceptance-stage-workflow
+#    uses: zerai/eShop/.github/workflows/publish-coverage-metrics.yaml@main
+#    with:
+#      triggering-sha: "${{ github.sha }}"

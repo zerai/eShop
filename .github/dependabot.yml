@@ -1,0 +1,70 @@
+# https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+
+updates:
+  - package-ecosystem: "composer"
+    target-branch: "5.4"
+    directory: "/"
+    versioning-strategy: "increase-if-necessary"
+    open-pull-requests-limit: 10
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "zerai"
+    commit-message:
+      include: "scope"
+      prefix: "composer"
+    labels:
+      - "php dependency"
+    ignore:
+      - dependency-name: "symfony/*"
+        versions: ["6.x"]
+
+  #
+  # Tools dependecy track
+  #
+  - package-ecosystem: "composer"
+    target-branch: "5.4"
+    directory: "/tools/phpstan"
+    versioning-strategy: "increase-if-necessary"
+    open-pull-requests-limit: 5
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "zerai"
+    commit-message:
+      include: "scope"
+      prefix: "composer"
+    labels:
+      - "tool dependency"
+
+  - package-ecosystem: "composer"
+    target-branch: "5.4"
+    directory: "/tools/ecs"
+    versioning-strategy: "increase-if-necessary"
+    open-pull-requests-limit: 5
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "zerai"
+    commit-message:
+      include: "scope"
+      prefix: "composer"
+    labels:
+      - "tool dependency"
+
+  - package-ecosystem: "composer"
+    target-branch: "5.4"
+    directory: "/tools/rector"
+    versioning-strategy: "increase-if-necessary"
+    open-pull-requests-limit: 5
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "zerai"
+    commit-message:
+      include: "scope"
+      prefix: "composer"
+    labels:
+      - "tool dependency"

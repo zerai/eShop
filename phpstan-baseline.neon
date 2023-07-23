@@ -1,0 +1,27 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Property IdentityAccess\\\\Application\\\\Model\\\\Identity\\\\User\\:\\:\\$email is never read, only written\\.$#"
+			count: 1
+			path: srcIam/src/Application/Model/Identity/User.php
+
+		-
+			message: "#^Property IdentityAccess\\\\Application\\\\Model\\\\Identity\\\\User\\:\\:\\$hashedPassword is never read, only written\\.$#"
+			count: 1
+			path: srcIam/src/Application/Model/Identity/User.php
+
+		-
+			message: "#^Property IdentityAccess\\\\Application\\\\Model\\\\Identity\\\\User\\:\\:\\$userId is never read, only written\\.$#"
+			count: 1
+			path: srcIam/src/Application/Model/Identity/User.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: srcIam/tests/Unit/UserIdTest.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: tests/Functional/Security/SecurityApiLoginTest.php
+

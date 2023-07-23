@@ -1,0 +1,25 @@
+includes:
+	- phpstan-baseline.neon
+
+parameters:
+    level: 5
+
+    paths:
+        - src/
+        - tests/
+        - srcIam/src/
+        - srcIam/tests/
+
+
+    checkMissingIterableValueType: false
+
+    inferPrivatePropertyTypeFromConstructor: true
+
+    #bootstrapFiles:
+        #- bin/.phpunit/phpunit/vendor/autoload.php
+
+    excludePaths:
+        - tests/bootstrap.php
+        - srcIam/src/Adapter/Api/Auth/LogoutController.php
+
+    tmpDir: var/tools/phpstan/
