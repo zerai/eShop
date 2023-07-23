@@ -12,6 +12,8 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->paths([
         __DIR__ . '/src',
         __DIR__ . '/tests',
+        __DIR__ . '/_basket/src',
+        __DIR__ . '/_basket/tests',
         __DIR__ . '/srcIam/src',
         __DIR__ . '/srcIam/tests',
     ]);

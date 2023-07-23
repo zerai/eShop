@@ -23,19 +23,25 @@
         </testsuite>
         <testsuite name="unit">
             <directory>tests/Unit</directory>
+            <directory>_basket/tests/Unit</directory>
             <directory>srcIam/tests/Unit</directory>
         </testsuite>
         <testsuite name="integration">
             <directory>tests/Integration</directory>
+            <directory>_basket/tests/Integration</directory>
+            <directory>srcIam/tests/Integration</directory>
         </testsuite>
         <testsuite name="functional">
             <directory>tests/Functional</directory>
+            <directory>_basket/tests/Functional</directory>
+            <directory>srcIam/tests/Functional</directory>
         </testsuite>
     </testsuites>
 
     <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">src</directory>
+            <directory suffix=".php">_basket/src</directory>
             <directory suffix=".php">srcIam/src</directory>
         </include>
     </coverage>

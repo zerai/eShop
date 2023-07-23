@@ -77,12 +77,14 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/",
+            "Basket\\": "_basket/src/",
             "IdentityAccess\\": "srcIam/src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "App\\Tests\\": "tests/",
+            "Basket\\TestS\\": "_basket/tests/",
             "IdentityAccess\\Tests\\": "srcIam/tests/"
         }
     },
