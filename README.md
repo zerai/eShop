@@ -1,2 +1,2 @@
 [![CD/CI](https://github.com/OpenDaje/symfony-es-cqrs-boilerplate/actions/workflows/cd-ci.yaml/badge.svg)](https://github.com/OpenDaje/symfony-es-cqrs-boilerplate/actions/workflows/cd-ci.yaml)
-# Symfony ES-CQRS boilerplate
+# eShop demo application
