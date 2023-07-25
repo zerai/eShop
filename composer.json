@@ -1,7 +1,7 @@
 {
-    "name": "opendaje/symfony-es-cqrs-boilerplate",
+    "name": "zerai/eshop",
     "type": "project",
-    "description": "symfony es cqrs boilerplate",
+    "description": "eshop demo application",
     "license": "proprietary",
     "require": {
         "php": ">=8.0",
@@ -79,6 +79,7 @@
         "psr-4": {
             "App\\": "src/",
             "Basket\\": "_basket/src/",
+            "Catalog\\": "_catalog/src/",
             "IdentityAccess\\": "srcIam/src/"
         }
     },
@@ -86,6 +87,7 @@
         "psr-4": {
             "App\\Tests\\": "tests/",
             "Basket\\Tests\\": "_basket/tests/",
+            "Catalog\\Tests\\": "_catalog/tests/",
             "IdentityAccess\\Tests\\": "srcIam/tests/"
         }
     },

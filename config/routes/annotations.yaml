@@ -13,3 +13,7 @@ iam_api_controllers:
 basket_api_controllers:
   resource: ../../_basket/src/Adapter/Api/
   type: annotation
+
+catalog_api_controllers:
+  resource: ../../_catalog/src/Adapter/Api/
+  type: annotation

@@ -7,8 +7,10 @@ parameters:
     paths:
         - src/
         - tests/
-        - _basket/src
-        - _basket/tests
+        - _basket/src/
+        - _basket/tests/
+        - _catalog/src/
+        - _catalog/tests/
         - srcIam/src/
         - srcIam/tests/
 
