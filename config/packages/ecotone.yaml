@@ -1,7 +1,8 @@
 ecotone:
-  loadSrcNamespaces: true
+  loadSrcNamespaces: false
   namespaces:
     - 'IdentityAccess'
+    - 'Basket'
   failFast: true
   defaultConnectionExceptionRetry:
     initialDelay: 100 #int (default: 100, production: 1000)

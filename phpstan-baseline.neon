@@ -1,6 +1,26 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Property Basket\\\\Application\\\\Model\\\\CustomerBasket\\:\\:\\$basketId is never read, only written\\.$#"
+			count: 1
+			path: _basket/src/Application/Model/CustomerBasket.php
+
+		-
+			message: "#^Property Basket\\\\Application\\\\Model\\\\CustomerBasket\\:\\:\\$buyerId is never read, only written\\.$#"
+			count: 1
+			path: _basket/src/Application/Model/CustomerBasket.php
+
+		-
+			message: "#^Property Basket\\\\Application\\\\Model\\\\CustomerBasket\\:\\:\\$items is never read, only written\\.$#"
+			count: 1
+			path: _basket/src/Application/Model/CustomerBasket.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: _basket/tests/Unit/Model/BasketTest.php
+
+		-
 			message: "#^Property IdentityAccess\\\\Application\\\\Model\\\\Identity\\\\User\\:\\:\\$email is never read, only written\\.$#"
 			count: 1
 			path: srcIam/src/Application/Model/Identity/User.php

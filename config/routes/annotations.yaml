@@ -9,3 +9,7 @@ kernel:
 iam_api_controllers:
   resource: ../../srcIam/src/Adapter/Api/
   type: annotation
+
+basket_api_controllers:
+  resource: ../../_basket/src/Adapter/Api/
+  type: annotation
