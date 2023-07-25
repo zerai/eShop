@@ -3,6 +3,7 @@ ecotone:
   namespaces:
     - 'IdentityAccess'
     - 'Basket'
+    - 'Catalog'
   failFast: true
   defaultConnectionExceptionRetry:
     initialDelay: 100 #int (default: 100, production: 1000)

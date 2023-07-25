@@ -24,16 +24,19 @@
         <testsuite name="unit">
             <directory>tests/Unit</directory>
             <directory>_basket/tests/Unit</directory>
+            <directory>_catalog/tests/Unit</directory>
             <directory>srcIam/tests/Unit</directory>
         </testsuite>
         <testsuite name="integration">
             <directory>tests/Integration</directory>
             <directory>_basket/tests/Integration</directory>
+            <directory>_catalog/tests/Integration</directory>
             <directory>srcIam/tests/Integration</directory>
         </testsuite>
         <testsuite name="functional">
             <directory>tests/Functional</directory>
             <directory>_basket/tests/Functional</directory>
+            <directory>_catalog/tests/Functional</directory>
             <directory>srcIam/tests/Functional</directory>
         </testsuite>
     </testsuites>
@@ -42,6 +45,7 @@
         <include>
             <directory suffix=".php">src</directory>
             <directory suffix=".php">_basket/src</directory>
+            <directory suffix=".php">_catalog/src</directory>
             <directory suffix=".php">srcIam/src</directory>
         </include>
     </coverage>

@@ -14,6 +14,8 @@ return static function (RectorConfig $rectorConfig): void {
         __DIR__ . '/tests',
         __DIR__ . '/_basket/src',
         __DIR__ . '/_basket/tests',
+        __DIR__ . '/_catalog/src',
+        __DIR__ . '/_catalog/tests',
         __DIR__ . '/srcIam/src',
         __DIR__ . '/srcIam/tests',
     ]);
