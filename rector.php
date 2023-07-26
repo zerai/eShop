@@ -16,8 +16,9 @@ return static function (RectorConfig $rectorConfig): void {
         __DIR__ . '/_basket/tests',
         __DIR__ . '/_catalog/src',
         __DIR__ . '/_catalog/tests',
-        __DIR__ . '/srcIam/src',
-        __DIR__ . '/srcIam/tests',
+        __DIR__ . '/_iam/src',
+        __DIR__ . '/_iam/tests',
+
     ]);
 
     $rectorConfig->phpVersion(PhpVersion::PHP_80);

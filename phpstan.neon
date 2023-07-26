@@ -11,8 +11,8 @@ parameters:
         - _basket/tests/
         - _catalog/src/
         - _catalog/tests/
-        - srcIam/src/
-        - srcIam/tests/
+        - _iam/src/
+        - _iam/tests/
 
 
     checkMissingIterableValueType: false

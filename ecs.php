@@ -20,8 +20,8 @@ return static function (ECSConfig $ecsConfig): void {
         __DIR__ . '/_basket/tests',
         __DIR__ . '/_catalog/src',
         __DIR__ . '/_catalog/tests',
-        __DIR__ . '/srcIam/src',
-        __DIR__ . '/srcIam/tests',
+        __DIR__ . '/_iam/src',
+        __DIR__ . '/_iam/tests',
         __DIR__ . '/ecs.php',
         __DIR__ . '/rector.php',
     ]);

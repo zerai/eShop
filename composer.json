@@ -80,7 +80,7 @@
             "App\\": "src/",
             "Basket\\": "_basket/src/",
             "Catalog\\": "_catalog/src/",
-            "IdentityAccess\\": "srcIam/src/"
+            "IdentityAccess\\": "_iam/src/"
         }
     },
     "autoload-dev": {
@@ -88,7 +88,7 @@
             "App\\Tests\\": "tests/",
             "Basket\\Tests\\": "_basket/tests/",
             "Catalog\\Tests\\": "_catalog/tests/",
-            "IdentityAccess\\Tests\\": "srcIam/tests/"
+            "IdentityAccess\\Tests\\": "_iam/tests/"
         }
     },
     "minimum-stability": "stable",
