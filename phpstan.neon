@@ -24,6 +24,6 @@ parameters:
 
     excludePaths:
         - tests/bootstrap.php
-        - srcIam/src/Adapter/Api/Auth/LogoutController.php
+        - _iam/src/Adapter/Api/Auth/LogoutController.php
 
     tmpDir: var/tools/phpstan/

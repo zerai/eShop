@@ -7,7 +7,7 @@ kernel:
   type: annotation
 
 iam_api_controllers:
-  resource: ../../srcIam/src/Adapter/Api/
+  resource: ../../_iam/src/Adapter/Api/
   type: annotation
 
 basket_api_controllers:
