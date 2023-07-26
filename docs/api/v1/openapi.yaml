@@ -1,15 +1,15 @@
 openapi: 3.0.0
 info:
-  title: Symfony cqrs-es boilerplate
+  title: eShop
   version: '0.1'
   contact:
-    name: OpenDaje
-    email: opendaje@example.com
-    url: 'https://opendaje.example.com'
+    name: Zerai Teclai
+    email: teclaizerai@googlemail.com
+    url: 'https://eshop-demo.example.com'
   license:
     name: MIT
-    url: 'https://github.com/OpenDaje/symfony-es-cqrs-boilerplate/blob/main/LICENSE'
-  description: A symfony boilerplate repository
+    url: 'https://github.com/zerai/eshop/blob/main/LICENSE'
+  description: An eShop demo application
 servers:
   - url: 'http://localhost:80'
     description: Local
