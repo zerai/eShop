@@ -54,4 +54,9 @@ class User
         $this->userId = $event->getUserId();
         $this->hashedPassword = $event->getPassword();
     }
+
+    public function id(): string
+    {
+        return $this->userId;
+    }
 }
