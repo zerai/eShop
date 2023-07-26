@@ -21,24 +21,74 @@ parameters:
 			path: _basket/tests/Unit/Model/BasketTest.php
 
 		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$availableStock is unused\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$catalogBrandId is unused\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$catalogItemId is never read, only written\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$catalogTypeId is unused\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$description is never read, only written\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$maxStockThreshold is unused\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$name is never read, only written\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$pictureFileName is unused\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$pictureUri is unused\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$price is unused\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
+			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$restockThreshold is unused\\.$#"
+			count: 1
+			path: _catalog/src/Application/Model/CatalogItem.php
+
+		-
 			message: "#^Property IdentityAccess\\\\Application\\\\Model\\\\Identity\\\\User\\:\\:\\$email is never read, only written\\.$#"
 			count: 1
-			path: srcIam/src/Application/Model/Identity/User.php
+			path: _iam/src/Application/Model/Identity/User.php
 
 		-
 			message: "#^Property IdentityAccess\\\\Application\\\\Model\\\\Identity\\\\User\\:\\:\\$hashedPassword is never read, only written\\.$#"
 			count: 1
-			path: srcIam/src/Application/Model/Identity/User.php
-
-		-
-			message: "#^Property IdentityAccess\\\\Application\\\\Model\\\\Identity\\\\User\\:\\:\\$userId is never read, only written\\.$#"
-			count: 1
-			path: srcIam/src/Application/Model/Identity/User.php
+			path: _iam/src/Application/Model/Identity/User.php
 
 		-
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 1
-			path: srcIam/tests/Unit/UserIdTest.php
+			path: _iam/tests/Unit/UserIdTest.php
 
 		-
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
