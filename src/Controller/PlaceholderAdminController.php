@@ -13,7 +13,7 @@ class PlaceholderAdminController extends AbstractController
     public function __invoke(): Response
     {
         return new JsonResponse([
-            'applicationName' => 'Symfony es cqrs boilerplate',
+            'applicationName' => 'eShop',
         ]);
     }
 }
