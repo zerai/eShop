@@ -14,7 +14,7 @@ class UserIdTest extends TestCase
 
     private const OTHER_UUID = '1352cf79-ec96-4efa-af92-e0cae57c7951';
 
-    public function testAttibuteAfterConstruct(): void
+    public function testAttributeAfterConstruct(): void
     {
         $sut = UserId::fromString(self::UUID);
 
