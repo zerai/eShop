@@ -3,6 +3,8 @@
 namespace Catalog\Application\Model;
 
 use Catalog\Application\Model\Command\AddItemToCatalog;
+use Catalog\Application\Model\Command\IncreaseStock;
+use Catalog\Application\Model\Event\AvailableStockWasIncreased;
 use Catalog\Application\Model\Event\CatalogItemWasAdded;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
@@ -40,7 +42,7 @@ class CatalogItem
     //TODO
     //private CatalogBrand $catalogBrand;
 
-    private int $availableStock;
+    private int $availableStock = 0;
 
     private int $restockThreshold;
 
@@ -48,18 +50,41 @@ class CatalogItem
 
     public bool $onOrder;
 
-    #[CommandHandler(self::ADD_CATALOG_ITEM)]
     #[CommandHandler()]
+    #[CommandHandler(self::ADD_CATALOG_ITEM)]
     public static function add(AddItemToCatalog $command): array
     {
         return [new CatalogItemWasAdded($command->catalogItemId, $command->name, $command->description)];
     }
 
+    #[CommandHandler()]
+    public static function addStock(IncreaseStock $command): array
+    {
+        return [new AvailableStockWasIncreased($command->catalogItemId(), $command->quantity())];
+    }
+
+    public function id(): string
+    {
+        return $this->catalogItemId;
+    }
+
+    public function availableStock(): int
+    {
+        return $this->availableStock;
+    }
+
     #[EventSourcingHandler]
-    public function applyCustomerBasketWasCreated(CatalogItemWasAdded $event): void
+    public function applyCatalogItemWasAdded(CatalogItemWasAdded $event): void
     {
         $this->catalogItemId = $event->catalogItemId;
         $this->name = $event->name;
         $this->description = $event->description;
+    }
+
+    #[EventSourcingHandler]
+    public function applyAvailableStockWasIncreased(AvailableStockWasIncreased $event): void
+    {
+        $this->catalogItemId = $event->catalogItemId();
+        $this->availableStock += $event->incrementFactor();
     }
 }

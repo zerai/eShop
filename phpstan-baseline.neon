@@ -21,17 +21,7 @@ parameters:
 			path: _basket/tests/Unit/Model/BasketTest.php
 
 		-
-			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$availableStock is unused\\.$#"
-			count: 1
-			path: _catalog/src/Application/Model/CatalogItem.php
-
-		-
 			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$catalogBrandId is unused\\.$#"
-			count: 1
-			path: _catalog/src/Application/Model/CatalogItem.php
-
-		-
-			message: "#^Property Catalog\\\\Application\\\\Model\\\\CatalogItem\\:\\:\\$catalogItemId is never read, only written\\.$#"
 			count: 1
 			path: _catalog/src/Application/Model/CatalogItem.php
 
