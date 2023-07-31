@@ -3,9 +3,12 @@
 namespace Catalog\Application\Model;
 
 use Catalog\Application\Model\Command\AddItemToCatalog;
+use Catalog\Application\Model\Command\DecreaseStock;
 use Catalog\Application\Model\Command\IncreaseStock;
+use Catalog\Application\Model\Event\AvailableStockWasDecreased;
 use Catalog\Application\Model\Event\AvailableStockWasIncreased;
 use Catalog\Application\Model\Event\CatalogItemWasAdded;
+use Ecotone\EventSourcing\Attribute\Stream;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
@@ -13,6 +16,7 @@ use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcingAggregate]
+#[Stream("catalog_item_stream")]
 class CatalogItem
 {
     public const ADD_CATALOG_ITEM = 'catalog.add-catalog-item';
@@ -63,6 +67,12 @@ class CatalogItem
         return [new AvailableStockWasIncreased($command->catalogItemId(), $command->quantity())];
     }
 
+    #[CommandHandler()]
+    public static function removeStock(DecreaseStock $command): array
+    {
+        return [new AvailableStockWasDecreased($command->catalogItemId(), $command->quantity())];
+    }
+
     public function id(): string
     {
         return $this->catalogItemId;
@@ -86,5 +96,12 @@ class CatalogItem
     {
         $this->catalogItemId = $event->catalogItemId();
         $this->availableStock += $event->incrementFactor();
+    }
+
+    #[EventSourcingHandler]
+    public function applyAvailableStockWasDecreased(AvailableStockWasDecreased $event): void
+    {
+        $this->catalogItemId = $event->catalogItemId();
+        $this->availableStock -= $event->decrementFactor();
     }
 }

@@ -4,7 +4,9 @@ namespace Catalog\Tests\Unit\Model;
 
 use Catalog\Application\Model\CatalogItem;
 use Catalog\Application\Model\Command\AddItemToCatalog;
+use Catalog\Application\Model\Command\DecreaseStock;
 use Catalog\Application\Model\Command\IncreaseStock;
+use Catalog\Application\Model\Event\AvailableStockWasDecreased;
 use Catalog\Application\Model\Event\AvailableStockWasIncreased;
 use Catalog\Application\Model\Event\CatalogItemWasAdded;
 
@@ -79,6 +81,47 @@ final class CatalogItemTest extends TestCase
                     new AddItemToCatalog($catalogItemId, $name, $description),
                 ])
                 ->sendCommand(new IncreaseStock($catalogItemId, $quantity))
+                ->getRecordedEvents()
+        );
+    }
+
+    public function test_decrease_catalog_item_stock(): void
+    {
+        $catalogItemId = Uuid::uuid4()->toString();
+        $name = 'irrelevant';
+        $description = 'description';
+        $quantity = 50;
+
+        /** Verifying aggregate property, after calling command */
+        $this->assertEquals(
+            250,
+            EcotoneLite::bootstrapFlowTesting([CatalogItem::class])
+                ->withEventsFor($catalogItemId, CatalogItem::class, [
+                    new AddItemToCatalog($catalogItemId, $name, $description),
+                    new AvailableStockWasIncreased($catalogItemId, 100),
+                    new AvailableStockWasIncreased($catalogItemId, 200),
+                ])
+                ->sendCommand(new DecreaseStock($catalogItemId, 50))
+                ->getAggregate(CatalogItem::class, $catalogItemId)
+                ->availableStock()
+        );
+    }
+
+    public function test_decrease_catalog_item_stock_with_message_flow(): void
+    {
+        $catalogItemId = Uuid::uuid4()->toString();
+        $name = 'irrelevant';
+        $description = 'description';
+        $quantity = 100;
+
+        /** Verifying published events by aggregate, after calling command */
+        $this->assertEquals(
+            [new AvailableStockWasDecreased($catalogItemId, $quantity)],
+            EcotoneLite::bootstrapFlowTesting([CatalogItem::class])
+                ->withEventsFor($catalogItemId, CatalogItem::class, [
+                    new AddItemToCatalog($catalogItemId, $name, $description),
+                ])
+                ->sendCommand(new DecreaseStock($catalogItemId, $quantity))
                 ->getRecordedEvents()
         );
     }
