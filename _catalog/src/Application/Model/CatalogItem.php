@@ -16,9 +16,11 @@ use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcingAggregate]
-#[Stream("catalog_item_stream")]
+#[Stream(self::STREAM_NAME)]
 class CatalogItem
 {
+    public const STREAM_NAME = 'catalog_item_stream';
+
     public const ADD_CATALOG_ITEM = 'catalog.add-catalog-item';
 
     use WithAggregateVersioning;

@@ -12,7 +12,7 @@ use Ecotone\EventSourcing\Attribute\ProjectionReset;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
-#[Projection(self::NAME, CatalogItem::class)]
+#[Projection(self::NAME, [CatalogItem::STREAM_NAME])]
 class CatalogItemProjection
 {
     public const NAME = "prj_catalog_item";
@@ -37,13 +37,6 @@ class CatalogItemProjection
     #[QueryHandler(self::GET_ITEM_BY_ID)]
     public function getCatalogItemById(string $catalogItemId): array
     {
-        //return [];
-        //        return [
-        //            "ticket" => $this->connection->executeQuery(<<<SQL
-        //    SELECT * FROM prj_catalog_item WHERE id = :item_id
-        //SQL, ["item_id" => $catalogItemId])->fetchAllAssociative()
-        //        ];
-
         return $this->connection->executeQuery(
             <<<SQL
     SELECT * FROM prj_catalog_item WHERE id = :item_id

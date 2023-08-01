@@ -15,18 +15,33 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class CatalogItemProjectionTest extends KernelTestCase
 {
-    public function testProjectionFirstEventWithTestSupport(): void
+    protected function setUp(): void
     {
-        self::markTestIncomplete();
+        $this->getTestSupport()
+            ->deleteEventStream(CatalogItem::STREAM_NAME)
+            ->initializeProjection(CatalogItemProjection::NAME)
+            ->resetProjection(CatalogItemProjection::NAME);
+    }
+
+    public function test_projection_query_get_item_by_id(): void
+    {
         $catalogItemId = Uuid::uuid4()->toString();
         $name = 'irrelevant';
         $description = 'description';
 
+        $expectedProjectionQueryResult = [
+            [
+                'id' => $catalogItemId,
+                'name' => $name,
+                'description' => $description,
+            ],
+        ];
+
         self::assertEquals(
-            [],
+            $expectedProjectionQueryResult,
             $this->getTestSupport()
-                ->deleteEventStream('catalog_item_stream')
-                ->resetProjection(CatalogItemProjection::NAME)
+                //->deleteEventStream(CatalogItem::STREAM_NAME)
+                //->resetProjection(CatalogItemProjection::NAME)
                 // 2. Providing initial events to run projection on
                 ->withEventsFor($catalogItemId, CatalogItem::class, [
                     new CatalogItemWasAdded($catalogItemId, $name, $description),

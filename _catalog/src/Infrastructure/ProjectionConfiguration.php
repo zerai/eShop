@@ -12,7 +12,9 @@ class ProjectionConfiguration
     #[ServiceContext]
     public function CatalogItemList()
     {
-        return ProjectionRunningConfiguration::createPolling(CatalogItemProjection::NAME);
+        /** remove comment for async configuration */
+        //return ProjectionRunningConfiguration::createPolling(CatalogItemProjection::NAME);
+        return [];
     }
 
     #[ServiceContext]
