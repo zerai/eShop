@@ -10,6 +10,7 @@ services:
       - default
     volumes:
       - "./:/app"
+    working_dir: "/app"
     environment:
       WEB_DOCUMENT_ROOT: /app/public
       WEB_DOCUMENT_INDEX: index.php
@@ -60,10 +61,10 @@ services:
     networks:
       - default
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-db-name}
+      POSTGRES_DB: ${POSTGRES_DB:-eshop}
       # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-db-password}
-      POSTGRES_USER: ${POSTGRES_USER:-db-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eshop}
+      POSTGRES_USER: ${POSTGRES_USER:-eshop}
       # volumes:
       # - db-data:/var/lib/postgresql/data:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
@@ -77,10 +78,10 @@ services:
     networks:
       - default
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-db-name_test}
+      POSTGRES_DB: ${POSTGRES_DB:-eshop_test}
       # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-db-password}
-      POSTGRES_USER: ${POSTGRES_USER:-db-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eshop}
+      POSTGRES_USER: ${POSTGRES_USER:-eshop}
       # volumes:
       # - db-data:/var/lib/postgresql/data:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
@@ -88,7 +89,7 @@ services:
 
 
   pgadmin:
-    image: dpage/pgadmin4:6.2
+    image: dpage/pgadmin4:7.5
     ports:
       - "8181:80"
     networks:
