@@ -2,6 +2,7 @@
 
 namespace IdentityAccess\Application\Model\Identity;
 
+use Ecotone\EventSourcing\Attribute\Stream;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
@@ -13,8 +14,11 @@ use IdentityAccess\Application\Model\Identity\Event\UserPasswordWasChanged;
 use IdentityAccess\Application\Model\Identity\Event\UserWasRegistered;
 
 #[EventSourcingAggregate]
+#[Stream(self::STREAM_NAME)]
 class User
 {
+    public const STREAM_NAME = 'iam_user_stream';
+
     public const REGISTER_USER = "user.registerUser";
 
     public const CHANGE_PASSWORD = "user.changePassword";
