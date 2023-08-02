@@ -15,9 +15,11 @@ use IdentityAccess\Application\Model\Identity\Event\UserWasRegistered;
 use IdentityAccess\Application\Model\Identity\User;
 use IdentityAccess\Infrastructure\Authentication\SecurityUser;
 
-#[Projection('UserListProjection', User::class)]
+#[Projection(self::NAME, User::STREAM_NAME)]
 class UserListProjection
 {
+    public const NAME = "prj_user_list";
+
     public const GET_USER_LIST = "getUserList";
 
     public const GET_SECURITY_USER = "getSecurityUser";
