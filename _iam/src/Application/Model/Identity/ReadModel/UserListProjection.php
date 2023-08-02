@@ -15,8 +15,8 @@ use IdentityAccess\Application\Model\Identity\Event\UserWasRegistered;
 use IdentityAccess\Application\Model\Identity\User;
 use IdentityAccess\Infrastructure\Authentication\SecurityUser;
 
-#[Projection('UserList', User::class)]
-class UserList
+#[Projection('UserListProjection', User::class)]
+class UserListProjection
 {
     public const GET_USER_LIST = "getUserList";
 
