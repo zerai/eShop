@@ -4,6 +4,7 @@ namespace IdentityAccess\Tests\Unit\Model;
 
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\FlowTestSupport;
+use IdentityAccess\Application\Model\Identity\Command\RegisterUser;
 use IdentityAccess\Application\Model\Identity\Event\UserWasRegistered;
 use IdentityAccess\Application\Model\Identity\User;
 use PHPUnit\Framework\TestCase;
@@ -15,30 +16,44 @@ final class UserTest extends TestCase
     {
         $expectedUserId = $userId = Uuid::uuid4()->toString();
         $expectedEmail = $email = 'user.' . $userId . '@example.com';
-        $hashedPassword = Uuid::uuid4()->toString();
+        $expectedHashedPassword = $hashedPassword = Uuid::uuid4()->toString();
+
+        /** Retrieve user aggregate, after calling command */
+        $user = $this->getTestSupport()
+            ->sendCommandWithRoutingKey(User::REGISTER_USER, new RegisterUser($email, $hashedPassword, $userId))
+            ->getAggregate(User::class, $userId);
 
         /** Verifying aggregate id property, after calling command */
         $this->assertEquals(
             $expectedUserId,
-            $retrievedUserId = $this->getTestSupport()
-                ->withEventsFor($userId, User::class, [
-                    new UserWasRegistered($userId, $email, $hashedPassword),
-                ])
-                ->getAggregate(User::class, $userId)
-                ->id(),
-            sprintf("ERROR: expected User::id() '%s', got: %s", $email, $retrievedUserId)
+            $retrievedUserId = $user->id(),
+            sprintf("ERROR: expected User::id() '%s', got: %s.", $email, $retrievedUserId)
         );
 
         /** Verifying aggregate email property, after calling command */
         $this->assertEquals(
             $expectedEmail,
-            $retrievedEmail = $this->getTestSupport()
-                ->withEventsFor($userId, User::class, [
-                    new UserWasRegistered($userId, $email, $hashedPassword),
-                ])
-                ->getAggregate(User::class, $userId)
-                ->email(),
-            sprintf("ERROR: expected User::email() '%s', got: %s", $email, $retrievedEmail)
+            $retrievedEmail = $user->email(),
+            sprintf("ERROR: expected User::email() '%s', got: %s.", $email, $retrievedEmail)
+        );
+
+        /** Verifying aggregate password property, after calling command */
+        $this->assertEquals(
+            $expectedHashedPassword,
+            $retrievedPassword = $user->password(),
+            sprintf("ERROR: expected User::password() '%s', got: %s.", $hashedPassword, $retrievedPassword)
+        );
+
+        /** Retrieve emitted events, after calling command */
+        $emittedEvents = $this->getTestSupport()
+            ->sendCommandWithRoutingKey(User::REGISTER_USER, new RegisterUser($email, $hashedPassword, $userId))
+            ->getRecordedEvents();
+
+        /** Verifying emitted events, after calling command */
+        self::assertEquals(
+            [new UserWasRegistered($userId, $email, $hashedPassword)],
+            $emittedEvents,
+            sprintf("ERROR: User::class emitted events does not match.")
         );
     }
 
