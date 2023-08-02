@@ -10,7 +10,10 @@ use IdentityAccess\Application\Model\Identity\User;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
-final class UserTest extends TestCase
+/**
+ * @covers \IdentityAccess\Application\Model\Identity\User
+ */
+class UserTest extends TestCase
 {
     public function test_verify_user_properties_on_user_registration(): void
     {
