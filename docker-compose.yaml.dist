@@ -100,3 +100,14 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: "admin@example.com"
       PGADMIN_DEFAULT_PASSWORD: "admin"
+
+
+  openapi-catalog:
+    image: redocly/openapi-cli
+    ports:
+      - "8282:80"
+    networks:
+      - default
+    volumes:
+      - "./docs/api/v1:/spec"
+    command: ["preview-docs", "-h", "0.0.0.0", "-p", "80", "openapi.yaml"]
