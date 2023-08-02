@@ -63,4 +63,9 @@ class User
     {
         return $this->userId;
     }
+
+    public function email(): string
+    {
+        return $this->email;
+    }
 }
