@@ -32,56 +32,21 @@ class UserListProjection
     #[EventHandler]
     public function addUser(UserWasRegistered $event, array $metadata): void
     {
-        $this->connection->executeStatement(
-            <<<SQL
-                INSERT INTO users VALUES (?,?,?)
-            SQL,
-            [$event->getUserId(), $event->getEmail(), $event->getHashedPassword()]
-        );
+        $this->connection->insert(self::NAME, [
+            'user_id' => $event->getUserId(),
+            'email' => $event->getEmail(),
+            'password' => $event->getHashedPassword(),
+        ]);
     }
 
     #[EventHandler]
     public function changePassword(UserPasswordWasChanged $event, array $metadata): void
     {
-        $this->connection->update('users', [
+        $this->connection->update(self::NAME, [
             "password" => $event->getPassword(),
         ], [
             "user_id" => $event->getUserId(),
         ]);
-    }
-
-    #[ProjectionInitialization]
-    public function initialization(): void
-    {
-        $this->connection->executeStatement(
-            <<<SQL
-                CREATE TABLE IF NOT EXISTS users (
-                    user_id VARCHAR(36) PRIMARY KEY,
-                    email VARCHAR(25),
-                    password VARCHAR(200)
-                )
-            SQL
-        );
-    }
-
-    #[ProjectionReset]
-    public function reset(): void
-    {
-        $this->connection->executeStatement(
-            <<<SQL
-                DELETE FROM users
-            SQL
-        );
-    }
-
-    #[ProjectionDelete]
-    public function delete(): void
-    {
-        $this->connection->executeStatement(
-            <<<SQL
-                DROP TABLE users
-            SQL
-        );
     }
 
     #[QueryHandler(self::GET_USER_LIST)]
@@ -90,7 +55,7 @@ class UserListProjection
         try {
             return $this->connection->executeQuery(
                 <<<SQL
-                    SELECT * FROM users
+                    SELECT * FROM prj_user_list
                 SQL
             )->fetchAllAssociative();
         } catch (TableNotFoundException) {
@@ -103,7 +68,7 @@ class UserListProjection
     {
         $userData = $this->connection->executeQuery(
             <<<SQL
-                SELECT email, password FROM users WHERE email = :email
+                SELECT email, password FROM prj_user_list WHERE email = :email
             SQL,
             [
                 "email" => $securityIdentifier,
@@ -111,5 +76,39 @@ class UserListProjection
         )->fetchAllAssociative()[0];
 
         return SecurityUser::createFromReadModel($userData['email'], $userData['password']);
+    }
+
+    #[ProjectionInitialization]
+    public function initialization(): void
+    {
+        $this->connection->executeStatement(
+            <<<SQL
+                CREATE TABLE IF NOT EXISTS prj_user_list (
+                    user_id VARCHAR(36) PRIMARY KEY,
+                    email VARCHAR(125),
+                    password VARCHAR(200)
+                )
+            SQL
+        );
+    }
+
+    #[ProjectionReset]
+    public function reset(): void
+    {
+        $this->connection->executeStatement(
+            <<<SQL
+                DELETE FROM prj_user_list
+            SQL
+        );
+    }
+
+    #[ProjectionDelete]
+    public function delete(): void
+    {
+        $this->connection->executeStatement(
+            <<<SQL
+                DROP TABLE prj_user_list
+            SQL
+        );
     }
 }

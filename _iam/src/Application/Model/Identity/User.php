@@ -32,6 +32,7 @@ class User
 
     private string $hashedPassword;
 
+    #[CommandHandler()]
     #[CommandHandler(self::REGISTER_USER)]
     public static function register(RegisterUser $command): array
     {
