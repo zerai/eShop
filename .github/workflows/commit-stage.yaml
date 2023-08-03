@@ -372,3 +372,19 @@ jobs:
           ./bin/console debug:container
           ./vendor/bin/rector process --dry-run --ansi
 
+
+  validate-openapi:
+    name: Validate OpenApi schema
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout on SHA-${{ inputs.triggering-sha }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.triggering-sha }}
+
+      - name: Validate openApi schema
+        uses: mbowman100/swagger-validator-action@master
+        with:
+          files: |
+            docs/api/v1/openapi.yaml
