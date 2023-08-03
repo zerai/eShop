@@ -10,9 +10,17 @@ info:
     name: MIT
     url: 'https://github.com/zerai/eshop/blob/main/LICENSE'
   description: An eShop demo application
+
 servers:
   - url: 'http://localhost:80'
     description: Local
+
+tags:
+  - name: user
+    description: Operations over users
+  - name: catalog
+    description: Operations over catalog items
+
 paths:
   '/api/users':
     get:
@@ -30,6 +38,30 @@ paths:
       description: Retrieve the information of users.
       tags:
         - user
+
+  '/api/catalog/items/{id}':
+    get:
+      tags:
+        - catalog
+      summary: Get Catalog Item
+      description: Retrieve the information of catalog item.
+      operationId: get-catalog-item-by-id
+      parameters:
+        - name: id
+          in: path
+          description: catalog item identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Catalog Items Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItem'
+
+
 
 components:
   schemas:
@@ -53,6 +85,21 @@ components:
       required:
         - id
         - email
-tags:
-  - name: user
-    description: Operations over users
+    CatalogItem:
+      title: Catalog Item
+      type: object
+      description: ''
+      x-examples:
+        Foo Item:
+          id: fcb5d0b3-5fd9-45ef-a002-57fecfdc5dd0
+          name: foo stuff
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the given catalog item.
+          readOnly: true
+        name:
+          type: string
+      required:
+        - id
+        - name
