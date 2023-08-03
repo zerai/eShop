@@ -2,6 +2,8 @@
 
 namespace Catalog\Tests\Functional\Api;
 
+use Catalog\AclAdapter\ViewModel\CatalogItemProjection;
+use Catalog\Application\Model\CatalogItem;
 use Catalog\Tests\Integration\EcotoneDbConnectionConf;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\FlowTestSupport;
@@ -27,8 +29,11 @@ class CatalogControllerTest extends WebTestCase
         $this->client = static::createClient();
         $this->getTestSupport($this->client->getContainer()->get('doctrine.dbal.default_connection'))
             ->deleteEventStream(User::STREAM_NAME)
+            ->deleteEventStream(CatalogItem::STREAM_NAME)
             ->initializeProjection(UserListProjection::NAME)
-            ->resetProjection(UserListProjection::NAME);
+            ->initializeProjection(CatalogItemProjection::NAME)
+            ->resetProjection(UserListProjection::NAME)
+            ->resetProjection(CatalogItemProjection::NAME);
     }
 
     /**
@@ -89,11 +94,12 @@ class CatalogControllerTest extends WebTestCase
     {
         return EcotoneLite::bootstrapFlowTestingWithEventStore(
             // 1. Setting projection and aggregate that we want to resolve
-            [UserListProjection::class, User::class],
+            [UserListProjection::class, User::class, CatalogItem::class, CatalogItemProjection::class],
             [
                 DbalConnectionFactory::class => new DbalConnectionFactory(EcotoneDbConnectionConf::databaseDns()),
                 //new UserListProjection((self::bootKernel())->getContainer()->get('doctrine.dbal.default_connection')),
                 new UserListProjection($dbalConnection),
+                new CatalogItemProjection($dbalConnection),
 
             ],
             runForProductionEventStore: true
