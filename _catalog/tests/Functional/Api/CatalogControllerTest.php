@@ -60,7 +60,6 @@ class CatalogControllerTest extends WebTestCase
             ], JSON_THROW_ON_ERROR)
         );
 
-        dd($this->client->getResponse()->getContent());
         $data = json_decode($this->client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         $this->client->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $data['token']));

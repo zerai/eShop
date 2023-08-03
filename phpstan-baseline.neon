@@ -68,11 +68,6 @@ parameters:
 		-
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 1
-			path: _catalog/tests/Functional/Api/CatalogControllerTest.php
-
-		-
-			message: "#^Unreachable statement \\- code above always terminates\\.$#"
-			count: 1
 			path: _catalog/tests/Integration/AclAdapter/ViewModel/CatalogItemProjectionUsingDocumentStoreTest.php
 
 		-
