@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 7
     strategy:
+      max-parallel: 3
       matrix:
         php:
           - '8.0'
