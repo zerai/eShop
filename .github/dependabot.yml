@@ -68,3 +68,22 @@ updates:
       prefix: "composer"
     labels:
       - "tool dependency"
+
+  ########################################################################################################################
+  #
+  #   Github Actions dependencies
+  #
+  ########################################################################################################################
+  - package-ecosystem: "github-actions"
+    target-branch: "main"
+    directory: "/"
+    open-pull-requests-limit: 5
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "zerai"
+    commit-message:
+      include: "scope"
+      prefix: "github-actions"
+    labels:
+      - "GHA dependency"
