@@ -32,7 +32,7 @@ jobs:
           ref: ${{ github.event.workflow_run.head_commit.id }}
 
       - name: Dump GHA Context
-        uses: crazy-max/ghaction-dump-context@v1
+        uses: crazy-max/ghaction-dump-context@v2
 
   triggering-workflow-info:
     runs-on: ubuntu-latest
