@@ -78,12 +78,35 @@ jobs:
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GH_API_ARTIFACT_ACTION }}
 
+
+
+
+#      - name: Download unit test coverage artifact
+#        id: download-unit-test-coverage-artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          #name: ${{ vars.ARTIFATC_NAME_FOR_UNIT_TEST_COVERAGE }}-${{ inputs.triggering-sha}}
+#          name: ${{ vars.ARTIFATC_NAME_FOR_UNIT_TEST_COVERAGE }}-${{ github.event.workflow_run.head_commit.id }}
+
+
+
+
+      # NOTE:
+      # NON USARE action/download anche con il token
+      # non funziona se l'upload viene fatto in un diverso
+      # workflow o un workflow in un diverso repository
+      #
       - name: Download unit test coverage artifact
         id: download-unit-test-coverage-artifact
-        uses: actions/download-artifact@v4
-        with:
-          #name: ${{ vars.ARTIFATC_NAME_FOR_UNIT_TEST_COVERAGE }}-${{ inputs.triggering-sha}}
-          name: ${{ vars.ARTIFATC_NAME_FOR_UNIT_TEST_COVERAGE }}-${{ github.event.workflow_run.head_commit.id }}
+        run: |
+          gh run download -n ${{ vars.ARTIFATC_NAME_FOR_UNIT_TEST_COVERAGE }}-${{ github.event.workflow_run.head_commit.id }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+
+
+
+
 
 
 #      - name: Upload coverage results to Codecov
