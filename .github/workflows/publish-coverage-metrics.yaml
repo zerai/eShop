@@ -121,7 +121,7 @@ jobs:
 
       - name: Upload unit test coverage results to Codecov
         if: ${{ (steps.download-unit-test-coverage-artifact.outcome == 'success')}}
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           #files: ${{ vars.REPORT_NAME_FOR_UNIT_TEST_COVERAGE_CLOVER }},${{ env.REPORT_NAME_FOR_UNIT_TEST_COVERAGE_JUNIT }}
