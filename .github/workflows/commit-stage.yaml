@@ -20,7 +20,7 @@ env:
 jobs:
   unit-test:
     name: Unit tests (php-${{ matrix.php }})
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 7
     strategy:
       max-parallel: 3
@@ -127,7 +127,7 @@ jobs:
 
   lint-composer:
     name: Validate Composer
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 7
     strategy:
       matrix:
@@ -165,7 +165,7 @@ jobs:
 
   coding-standard:
     name: Coding Standard
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 7
     strategy:
       matrix:
@@ -238,7 +238,7 @@ jobs:
 
   phpstan:
     name: Static Analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 7
     strategy:
       matrix:
@@ -305,7 +305,7 @@ jobs:
 
   rector:
     name: Rector (maintenance)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 7
     strategy:
       matrix:
